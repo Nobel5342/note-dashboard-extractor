@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Environment variables and configuration
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+
+# Debug and log files
+*.log
+logs/
+
+# Output files
+output/*
+!output/.gitkeep
+
+# Screenshots directory
+screenshots/
+
+# Debug directory
+debug/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development configuration
+.python-version
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
