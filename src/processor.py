@@ -73,21 +73,42 @@ class DataProcessor:
                         pl.col("published_at").str.replace("年", "-").str.replace("月", "-").str.replace("日", "")
                         .alias("published_at_clean")
                     ])
-                    # 日付型に変換
-                    df = df.with_columns([
-                        pl.col("published_at_clean").str.to_date().alias("published_date")
-                    ])
-                    # 不要な中間列を削除
-                    df = df.drop("published_at_clean")
+                    # 日付型に変換を試みる
+                    try:
+                        df = df.with_columns([
+                            pl.col("published_at_clean").str.to_date().alias("published_date")
+                        ])
+                    except Exception as e:
+                        logger.warning(f"日付型への変換に失敗しました: {str(e)}")
             except Exception as e:
                 logger.warning(f"日付の変換処理に失敗しました: {str(e)}")
             
             # 数値データの型変換を確認
-            for col in ["views", "likes", "comments", "char_count"]:
+            for col in ["views", "likes", "comments", "char_count", "published_at_clean"]:
                 if col in df.columns:
-                    df = df.with_columns([
-                        pl.col(col).cast(pl.Int64).alias(col)
-                    ])
+                    try:
+                        df = df.with_columns([
+                            pl.col(col).cast(pl.Int64).alias(col)
+                        ])
+                    except Exception as e:
+                        logger.warning(f"{col}の数値変換に失敗しました: {str(e)}")
+            
+            # ビュー数が0の記事には警告ログを出す
+            try:
+                zero_views_count = df.filter(pl.col("views") == 0).height
+                if zero_views_count > 0:
+                    logger.warning(f"ビュー数が0の記事が{zero_views_count}件あります")
+            except Exception as e:
+                logger.warning(f"ビュー数チェック中にエラー: {str(e)}")
+            
+            # 本文が空の記事には警告ログを出す
+            try:
+                if "text_content" in df.columns:
+                    empty_content_count = df.filter(pl.col("text_content").str.lengths() == 0).height
+                    if empty_content_count > 0:
+                        logger.warning(f"本文が空の記事が{empty_content_count}件あります")
+            except Exception as e:
+                logger.warning(f"本文チェック中にエラー: {str(e)}")
             
             self.dataframe = df
             logger.info("データの前処理が完了しました")
